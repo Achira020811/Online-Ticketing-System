@@ -49,6 +49,8 @@ public class Main {
                         vendorThread = new Thread(vendor);
                         customerThread = new Thread(customer);
                         vendorThread.start();
+                       try{ vendorThread.join();}
+                       catch(InterruptedException e){}
                         customerThread.start();
                         logger.info("Ticket system started.");
                     } else {
