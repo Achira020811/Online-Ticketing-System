@@ -3,6 +3,12 @@ package Updated;
 import java.util.Scanner;
 import java.util.logging.*;
 
+import java.util.Scanner;
+import java.util.logging.Logger;
+
+import java.util.Scanner;
+import java.util.logging.Logger;
+
 public class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());
     private static TicketPool ticketPool;
@@ -12,87 +18,97 @@ public class Main {
     private static Customer customer;
 
     public static void main(String[] args) {
+        // Create the configuration object
         Configuration config = new Configuration();
 
-        // Load the configuration from file or prompt the user for input
-        config.loadConfiguration();
-
-        if (!config.validateConfiguration()) {
-            config.promptUserForConfig();
-            while (!config.validateConfiguration()) {
-                config.promptUserForConfig();
-            }
-        }
-
-        // Initialize the ticket pool with max capacity
-        ticketPool = new TicketPool(config.getMaxTicketCapacity());
-
-        // Create vendor and customer objects
-        vendor = new Vendor(ticketPool, config.getTicketReleaseRate());
-        customer = new Customer(ticketPool, config.getCustomerRetrievalRate());
-
-        // Display a welcome message and available commands
+        // Start menu loop
         Scanner scanner = new Scanner(System.in);
-        String command;
+        int choice;
 
-        System.out.println("Welcome to the Ticket System");
-        System.out.println("Enter 'start' to begin, 'stop' to end, 'status' for pool status, 'exit' to exit.");
+        do {
+            // Display the main menu
+            System.out.println("Ticket Pool System Main Menu");
+            System.out.println("1. Load Configuration from File");
+            System.out.println("2. Set Configuration Manually");
+            System.out.println("3. View Current Configuration");
+            System.out.println("4. Start the Ticket System");
+            System.out.println("5. Exit");
+            System.out.print("Enter your choice: ");
+            choice = scanner.nextInt();
+            scanner.nextLine();  // Consume newline character
 
-        // Main loop to handle user commands
-        while (true) {
-            System.out.print("> ");
-            command = scanner.nextLine();
-
-            switch (command.toLowerCase()) {
-                case "start":
-                    if (vendorThread == null || !vendorThread.isAlive()) {
-                        vendorThread = new Thread(vendor);
-                        customerThread = new Thread(customer);
-                        vendorThread.start();
-                       try{ vendorThread.join();}
-                       catch(InterruptedException e){}
-                        customerThread.start();
-                        logger.info("Ticket system started.");
+            switch (choice) {
+                case 1:
+                    // Load configuration from file
+                    config.loadConfiguration();
+                    if (config.validateConfiguration()) {
+                        System.out.println("Configuration loaded successfully.");
                     } else {
-                        System.out.println("System is already running.");
+                        System.out.println("Invalid configuration file. Using default values.");
                     }
                     break;
-                case "stop":
-                    if (vendorThread != null && vendorThread.isAlive()) {
-                        vendorThread.interrupt();
-                        customerThread.interrupt();
-                        logger.info("Ticket system stopped.");
+                case 2:
+                    // Manually set configuration
+                    config.promptUserForConfig();
+                    break;
+                case 3:
+                    // View current configuration
+                    System.out.println("Current Configuration:");
+                    System.out.println("Max Ticket Capacity: " + config.getMaxTicketCapacity());
+                    System.out.println("Max Tickets: " + config.getMaxTickets());
+                    System.out.println("Ticket Release Rate: " + config.getTicketReleaseRate());
+                    System.out.println("Customer Retrieval Rate: " + config.getCustomerRetrievalRate());
+                    break;
+                case 4:
+                    // Start the ticket system (if valid configuration)
+                    if (config.validateConfiguration()) {
+                        startTicketSystem(config);
                     } else {
-                        System.out.println("System is not running.");
+                        System.out.println("Invalid configuration. Please load or set the configuration first.");
                     }
                     break;
-                case "status":
-                    System.out.println("Current available tickets: " + ticketPool.getAvailableTickets());
-                    break;
-                case "exit":
+                case 5:
                     System.out.println("Exiting the system.");
-                    System.exit(0);
                     break;
                 default:
-                    System.out.println("Invalid command.");
+                    System.out.println("Invalid choice, please try again.");
             }
+        } while (choice != 5);
 
-            // If the ticket pool is full, stop adding tickets but allow customers to remove tickets
-            if (ticketPool.isFull()) {
-                System.out.println("Ticket pool is full. Vendors will stop adding tickets.");
-            }
+        scanner.close();
+    }
 
-            // If tickets are sold out, stop all operations
-            if (ticketPool.isEmpty()) {
-                System.out.println("Tickets are sold out.");
-                if (vendorThread != null && vendorThread.isAlive()) {
-                    vendorThread.interrupt();
-                }
-                if (customerThread != null && customerThread.isAlive()) {
-                    customerThread.interrupt();
-                }
-                break; // Exit the loop and terminate the system
-            }
+    // Method to start the ticket system with the given configuration
+    private static void startTicketSystem(Configuration config) {
+        // Initialize the ticket pool with max capacity and max tickets
+        ticketPool = new TicketPool(config.getMaxTicketCapacity(), config.getMaxTickets());
+
+        // Create vendor and customer objects with configuration values
+        vendor = new Vendor(ticketPool, config.getTicketReleaseRate());  // Only 2 arguments
+        customer = new Customer(ticketPool, config.getCustomerRetrievalRate());  // Only 2 arguments
+
+        // Start the vendor thread (add tickets)
+        vendorThread = new Thread(vendor);
+        vendorThread.start();
+
+        try {
+            // Wait for the vendor to finish adding tickets
+            vendorThread.join();  // Wait for vendor to finish adding tickets
+            System.out.println("Vendor finished adding tickets.");
+
+            // After the vendor finishes, start the customer thread (remove tickets)
+            customerThread = new Thread(customer);
+            customerThread.start();
+
+            // Wait for the customer to finish removing tickets
+            customerThread.join();  // Wait for customer to finish removing tickets
+            System.out.println("Customer finished removing tickets.");
+
+        } catch (InterruptedException e) {
+            logger.warning("Main thread interrupted.");
         }
+
+        // After both processes (adding and removing) finish, return to the main menu
+        System.out.println("Both ticket adding and removing processes have finished. Returning to the main menu.");
     }
 }

@@ -5,50 +5,49 @@ import java.util.List;
 import java.util.logging.*;
 
 public class TicketPool {
-    private List<Integer> tickets;
     private int maxCapacity;
-    private static final Logger logger = Logger.getLogger(TicketPool.class.getName());
+    private int maxTickets;
+    private int currentTickets;
+    private boolean addingTickets; // Flag to track if vendor is still adding tickets
 
-    public TicketPool(int maxCapacity) {
+    public TicketPool(int maxCapacity, int maxTickets) {
         this.maxCapacity = maxCapacity;
-        this.tickets = new LinkedList<>();
+        this.maxTickets = maxTickets;
+        this.currentTickets = 0;
+        this.addingTickets = true; // Start by allowing ticket adding
     }
 
-    // Vendor adds tickets to the pool (producer method)
-    public synchronized boolean addTickets(int count) {
-        if (tickets.size() >= maxCapacity) {
-            // Do not add tickets if it exceeds the max capacity
-            logger.warning("Ticket pool reached maximum capacity. No more tickets can be added.");
-            return false; // Stop adding tickets
-        }
-        for (int i = 0; i < count; i++) {
-            tickets.add(1); // Representing a ticket as 1
-        }
-        logger.info("Tickets added. Current pool size: " + tickets.size());
-        return true;
-    }
-
-    // Customer retrieves tickets from the pool (consumer method)
-    public synchronized boolean removeTicket() {
-        if (tickets.isEmpty()) {
-            logger.warning("No tickets available. Tickets are sold out.");
-            return false; // Stop if no tickets are available
-        } else {
-            tickets.remove(0);
-            logger.info("Ticket removed. Current pool size: " + tickets.size());
-            return true;
+    public synchronized void addTicket() {
+        // Check if the total tickets added is less than maxTickets
+        if (currentTickets < maxTickets) {
+            if (currentTickets < maxCapacity) {
+                currentTickets++;
+                System.out.println("Ticket added. Current tickets: " + currentTickets);
+            }
         }
     }
 
-    public synchronized int getAvailableTickets() {
-        return tickets.size();
+    public synchronized void removeTicket() {
+        if (currentTickets > 0) {
+            currentTickets--;
+            System.out.println("Ticket removed. Current tickets: " + currentTickets);
+        }
     }
 
-    public synchronized boolean isFull() {
-        return tickets.size() >= maxCapacity;
+    public synchronized int getCurrentTickets() {
+        return currentTickets;
     }
 
-    public synchronized boolean isEmpty() {
-        return tickets.size() == 0;
+    // Method for the vendor to stop adding tickets once the maxTickets is reached
+    public synchronized void stopAddingTickets() {
+        addingTickets = false;
+    }
+
+    public synchronized boolean isAddingTickets() {
+        return addingTickets;
+    }
+
+    public synchronized boolean hasReachedMaxTickets() {
+        return currentTickets >= maxTickets;
     }
 }

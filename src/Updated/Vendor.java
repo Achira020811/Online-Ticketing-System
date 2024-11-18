@@ -4,33 +4,32 @@ import java.util.logging.*;
 
 public class Vendor implements Runnable {
     private TicketPool ticketPool;
-    private int releaseRate;
-    private static final Logger logger = Logger.getLogger(Vendor.class.getName());
+    private int ticketReleaseRate;
 
-    public Vendor(TicketPool ticketPool, int releaseRate) {
+    public Vendor(TicketPool ticketPool, int ticketReleaseRate) {
         this.ticketPool = ticketPool;
-        this.releaseRate = releaseRate;
+        this.ticketReleaseRate = ticketReleaseRate;
     }
 
     @Override
     public void run() {
-        while (true) {
-            if (ticketPool.isFull()) {
-                logger.info("Ticket pool reached maximum capacity. Vendor will stop adding tickets.");
-                break; // Stop the vendor thread once the pool is full
+        // Vendor adds tickets in batches based on ticketReleaseRate until maxTickets is reached
+        while (!ticketPool.hasReachedMaxTickets()) {
+            // Add tickets up to ticketReleaseRate, as long as maxTickets is not reached
+            for (int i = 0; i < ticketReleaseRate; i++) {
+                if (!ticketPool.hasReachedMaxTickets()) {
+                    ticketPool.addTicket();
+                }
             }
-
-            // Add tickets to the pool at the specified release rate
-            if (!ticketPool.addTickets(releaseRate)) {
-                break; // Stop if tickets cannot be added due to capacity
-            }
-
             try {
-                Thread.sleep(1000); // Simulate time taken to release tickets
+                // Simulate the delay between ticket additions (adjust the sleep as necessary)
+                Thread.sleep(1000); // You can change this to adjust the rate of adding tickets
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
+        // Stop adding tickets once maxTickets is reached
+        ticketPool.stopAddingTickets();
+        System.out.println("Vendor finished adding tickets.");
     }
 }
-

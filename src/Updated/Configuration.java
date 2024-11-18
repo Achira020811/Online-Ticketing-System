@@ -1,81 +1,74 @@
 package Updated;
 
-import java.io.*;
+
+
 import java.util.Scanner;
+import java.util.Properties;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class Configuration {
-    private int totalTickets;
-    private int ticketReleaseRate;
-    private int customerRetrievalRate;
-    private int maxTicketCapacity;
+    private int maxCapacity; // Maximum capacity of tickets in the pool
+    private int maxTickets; // The total number of tickets to add before stopping
+    private int ticketReleaseRate; // Rate at which the vendor adds tickets
+    private int customerRetrievalRate; // Rate at which customers remove tickets
 
     public Configuration() {
         // Default values
-        this.totalTickets = 100;
-        this.ticketReleaseRate = 5;
-        this.customerRetrievalRate = 3;
-        this.maxTicketCapacity = 200;
+        this.maxCapacity = 100; // Default max capacity
+        this.maxTickets = 50; // Default total ticket limit
+        this.ticketReleaseRate = 10; // Default release rate per cycle
+        this.customerRetrievalRate = 5; // Default retrieval rate per cycle
     }
 
-    // Getter and Setter methods
-    public int getTotalTickets() { return totalTickets; }
-    public void setTotalTickets(int totalTickets) { this.totalTickets = totalTickets; }
-
-    public int getTicketReleaseRate() { return ticketReleaseRate; }
-    public void setTicketReleaseRate(int ticketReleaseRate) { this.ticketReleaseRate = ticketReleaseRate; }
-
-    public int getCustomerRetrievalRate() { return customerRetrievalRate; }
-    public void setCustomerRetrievalRate(int customerRetrievalRate) { this.customerRetrievalRate = customerRetrievalRate; }
-
-    public int getMaxTicketCapacity() { return maxTicketCapacity; }
-    public void setMaxTicketCapacity(int maxTicketCapacity) { this.maxTicketCapacity = maxTicketCapacity; }
-
-    // Method to load configuration from file
+    // Method to load configuration from a file (or use default)
     public void loadConfiguration() {
-        try (BufferedReader br = new BufferedReader(new FileReader("config.txt"))) {
-            totalTickets = Integer.parseInt(br.readLine());
-            ticketReleaseRate = Integer.parseInt(br.readLine());
-            customerRetrievalRate = Integer.parseInt(br.readLine());
-            maxTicketCapacity = Integer.parseInt(br.readLine());
-        } catch (IOException e) {
-            System.out.println("Error reading configuration file. Using default values.");
+        try (InputStream input = new FileInputStream("config.properties")) {
+            Properties prop = new Properties();
+            prop.load(input);
+            // Load values from the config file
+            this.maxCapacity = Integer.parseInt(prop.getProperty("maxCapacity", "100"));
+            this.maxTickets = Integer.parseInt(prop.getProperty("maxTickets", "50"));
+            this.ticketReleaseRate = Integer.parseInt(prop.getProperty("ticketReleaseRate", "10"));
+            this.customerRetrievalRate = Integer.parseInt(prop.getProperty("customerRetrievalRate", "5"));
+        } catch (IOException ex) {
+            System.out.println("Configuration file not found or invalid, using default values.");
         }
     }
 
-    // Method to save configuration to file
-    public void saveConfiguration() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("config.txt"))) {
-            bw.write(totalTickets + "\n");
-            bw.write(ticketReleaseRate + "\n");
-            bw.write(customerRetrievalRate + "\n");
-            bw.write(maxTicketCapacity + "\n");
-        } catch (IOException e) {
-            System.out.println("Error saving configuration.");
-        }
-    }
-
-    // Method to prompt the user for input
-    public void promptUserForConfig() {
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Enter total tickets: ");
-        totalTickets = sc.nextInt();
-
-        System.out.print("Enter ticket release rate: ");
-        ticketReleaseRate = sc.nextInt();
-
-        System.out.print("Enter customer retrieval rate: ");
-        customerRetrievalRate = sc.nextInt();
-
-        System.out.print("Enter max ticket capacity: ");
-        maxTicketCapacity = sc.nextInt();
-    }
-
-    // Validate the input values
+    // Method to validate configuration values
     public boolean validateConfiguration() {
-        if (totalTickets <= 0 || ticketReleaseRate <= 0 || customerRetrievalRate <= 0 || maxTicketCapacity <= 0) {
-            System.out.println("Invalid input. All values must be positive.");
-            return false;
-        }
-        return true;
+        return maxCapacity > 0 && maxTickets > 0 && ticketReleaseRate > 0 && customerRetrievalRate > 0;
+    }
+
+    // Method to prompt the user for configuration if invalid
+    public void promptUserForConfig() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the maximum ticket capacity:");
+        this.maxCapacity = Integer.parseInt(scanner.nextLine());
+        System.out.println("Enter the total number of tickets to add before stopping:");
+        this.maxTickets = Integer.parseInt(scanner.nextLine());
+        System.out.println("Enter the ticket release rate (how many tickets the vendor adds per cycle):");
+        this.ticketReleaseRate = Integer.parseInt(scanner.nextLine());
+        System.out.println("Enter the customer retrieval rate (how many tickets a customer removes per cycle):");
+        this.customerRetrievalRate = Integer.parseInt(scanner.nextLine());
+    }
+
+    // Getter methods for the configuration values
+    public int getMaxTicketCapacity() {
+        return maxCapacity;
+    }
+
+    public int getMaxTickets() {
+        return maxTickets;
+    }
+
+    public int getTicketReleaseRate() {
+        return ticketReleaseRate;
+    }
+
+    public int getCustomerRetrievalRate() {
+        return customerRetrievalRate;
     }
 }

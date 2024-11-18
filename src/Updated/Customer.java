@@ -4,34 +4,32 @@ import java.util.logging.*;
 
 public class Customer implements Runnable {
     private TicketPool ticketPool;
-    private int retrievalRate;
-    private static final Logger logger = Logger.getLogger(Customer.class.getName());
+    private int customerRetrievalRate; // Rate at which the customer retrieves tickets
 
-    public Customer(TicketPool ticketPool, int retrievalRate) {
+    public Customer(TicketPool ticketPool, int customerRetrievalRate) {
         this.ticketPool = ticketPool;
-        this.retrievalRate = retrievalRate;
+        this.customerRetrievalRate = customerRetrievalRate;
     }
 
     @Override
     public void run() {
-        while (true) {
-            if (ticketPool.isEmpty()) {
-                logger.info("Tickets are sold out.");
-                break; // Stop the customer thread if tickets are sold out
-            }
-
-            // Try to retrieve tickets from the pool at the specified retrieval rate
-            for (int i = 0; i < retrievalRate; i++) {
-                if (!ticketPool.removeTicket()) {
-                    break; // Stop if no tickets are available for customers
-                }
-            }
-
+        // The customer thread will continuously attempt to remove tickets based on customerRetrievalRate
+        while (ticketPool.getCurrentTickets() > 0 || ticketPool.isAddingTickets()) {
             try {
-                Thread.sleep(1000); // Simulate time taken for customers to purchase tickets
+                for (int i = 0; i < customerRetrievalRate; i++) {
+                    if (ticketPool.getCurrentTickets() > 0) {
+                        ticketPool.removeTicket();
+                    } else {
+                        break;
+                    }
+                }
+                // Simulate some delay between ticket retrieval cycles
+                Thread.sleep(1000); // Adjust sleep time as necessary
+
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
+        System.out.println("Customer has finished removing tickets.");
     }
 }
