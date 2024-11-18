@@ -1,24 +1,36 @@
 package Updated;
 
-public class Vendor implements Runnable {
-    private final TicketPool ticketPool;
-    private final int ticketReleaseRate;
+import java.util.logging.*;
 
-    public Vendor(TicketPool ticketPool, int ticketReleaseRate) {
+public class Vendor implements Runnable {
+    private TicketPool ticketPool;
+    private int releaseRate;
+    private static final Logger logger = Logger.getLogger(Vendor.class.getName());
+
+    public Vendor(TicketPool ticketPool, int releaseRate) {
         this.ticketPool = ticketPool;
-        this.ticketReleaseRate = ticketReleaseRate;
+        this.releaseRate = releaseRate;
     }
 
     @Override
     public void run() {
-        while (TicketSystem.isRunning) {
-            ticketPool.addTickets(ticketReleaseRate);
-            System.out.println("[Vendor] Tickets added: " + ticketReleaseRate);
+        while (true) {
+            if (ticketPool.isFull()) {
+                logger.info("Ticket pool reached maximum capacity. Vendor will stop adding tickets.");
+                break; // Stop the vendor thread once the pool is full
+            }
+
+            // Add tickets to the pool at the specified release rate
+            if (!ticketPool.addTickets(releaseRate)) {
+                break; // Stop if tickets cannot be added due to capacity
+            }
+
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1000); // Simulate time taken to release tickets
             } catch (InterruptedException e) {
-                System.out.println("[Vendor] Interrupted.");
+                Thread.currentThread().interrupt();
             }
         }
     }
 }
+

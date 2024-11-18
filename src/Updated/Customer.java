@@ -1,28 +1,36 @@
 package Updated;
 
-public class Customer implements Runnable {
-    private final TicketPool ticketPool;
-    private final String type;
-    private final int customerRetrievalRate;
+import java.util.logging.*;
 
-    public Customer(TicketPool ticketPool, String type, int customerRetrievalRate) {
+public class Customer implements Runnable {
+    private TicketPool ticketPool;
+    private int retrievalRate;
+    private static final Logger logger = Logger.getLogger(Customer.class.getName());
+
+    public Customer(TicketPool ticketPool, int retrievalRate) {
         this.ticketPool = ticketPool;
-        this.type = type;
-        this.customerRetrievalRate = customerRetrievalRate;
+        this.retrievalRate = retrievalRate;
     }
 
     @Override
     public void run() {
-        while (TicketSystem.isRunning) {
-            if (ticketPool.removeTickets(customerRetrievalRate)) {
-                System.out.println("[" + type + " Consumer] Tickets purchased: " + customerRetrievalRate);
-            } else {
-                System.out.println("[" + type + " Consumer] No tickets available.");
+        while (true) {
+            if (ticketPool.isEmpty()) {
+                logger.info("Tickets are sold out.");
+                break; // Stop the customer thread if tickets are sold out
             }
+
+            // Try to retrieve tickets from the pool at the specified retrieval rate
+            for (int i = 0; i < retrievalRate; i++) {
+                if (!ticketPool.removeTicket()) {
+                    break; // Stop if no tickets are available for customers
+                }
+            }
+
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1000); // Simulate time taken for customers to purchase tickets
             } catch (InterruptedException e) {
-                System.out.println("[" + type + " Consumer] Interrupted.");
+                Thread.currentThread().interrupt();
             }
         }
     }
