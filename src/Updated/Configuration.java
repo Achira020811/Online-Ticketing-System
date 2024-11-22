@@ -2,17 +2,16 @@ package Updated;
 
 
 
-import java.util.Scanner;
-import java.util.Properties;
-import java.io.FileInputStream;
+import com.google.gson.Gson;
+import java.io.FileWriter;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-
+import java.util.Scanner;
 public class Configuration {
-    private int maxCapacity; // Maximum capacity of tickets in the pool
-    private int maxTickets; // The total number of tickets to add before stopping
-    private int ticketReleaseRate; // Rate at which the vendor adds tickets
-    private int customerRetrievalRate; // Rate at which customers remove tickets
+    private int maxCapacity;
+    private int maxTickets;
+    private int ticketReleaseRate;
+    private int customerRetrievalRate;
 
     public Configuration() {
         // Default values
@@ -22,18 +21,30 @@ public class Configuration {
         this.customerRetrievalRate = 5; // Default retrieval rate per cycle
     }
 
-    // Method to load configuration from a file (or use default)
+    // Method to load configuration from a Gson file (or use default)
     public void loadConfiguration() {
-        try (InputStream input = new FileInputStream("config.properties")) {
-            Properties prop = new Properties();
-            prop.load(input);
-            // Load values from the config file
-            this.maxCapacity = Integer.parseInt(prop.getProperty("maxCapacity", "100"));
-            this.maxTickets = Integer.parseInt(prop.getProperty("maxTickets", "50"));
-            this.ticketReleaseRate = Integer.parseInt(prop.getProperty("ticketReleaseRate", "10"));
-            this.customerRetrievalRate = Integer.parseInt(prop.getProperty("customerRetrievalRate", "5"));
+        try (FileReader reader = new FileReader("config.json")) {
+            Gson gson = new Gson();
+            Configuration config = gson.fromJson(reader, Configuration.class);
+            // Set this instance's fields based on the loaded configuration
+            this.maxCapacity = config.maxCapacity;
+            this.maxTickets = config.maxTickets;
+            this.ticketReleaseRate = config.ticketReleaseRate;
+            this.customerRetrievalRate = config.customerRetrievalRate;
+            System.out.println("Configuration loaded from file.");
         } catch (IOException ex) {
             System.out.println("Configuration file not found or invalid, using default values.");
+        }
+    }
+
+    // Method to save configuration to a Gson file
+    public void saveConfiguration() {
+        try (FileWriter writer = new FileWriter("config.json")) {
+            Gson gson = new Gson();
+            gson.toJson(this, writer);  // Save the current configuration to the file
+            System.out.println("Configuration saved to file.");
+        } catch (IOException e) {
+            System.out.println("Error saving configuration.");
         }
     }
 

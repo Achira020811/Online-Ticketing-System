@@ -1,13 +1,10 @@
 package Updated;
 
 import java.util.Scanner;
-import java.util.logging.*;
 
-import java.util.Scanner;
 import java.util.logging.Logger;
 
-import java.util.Scanner;
-import java.util.logging.Logger;
+
 
 public class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());
@@ -32,7 +29,8 @@ public class Main {
             System.out.println("2. Set Configuration Manually");
             System.out.println("3. View Current Configuration");
             System.out.println("4. Start the Ticket System");
-            System.out.println("5. Exit");
+            System.out.println("5. Save Current Configuration");
+            System.out.println("6. Exit");
             System.out.print("Enter your choice: ");
             choice = scanner.nextInt();
             scanner.nextLine();  // Consume newline character
@@ -68,12 +66,16 @@ public class Main {
                     }
                     break;
                 case 5:
+                    // Save configuration
+                    config.saveConfiguration();
+                    break;
+                case 6:
                     System.out.println("Exiting the system.");
                     break;
                 default:
                     System.out.println("Invalid choice, please try again.");
             }
-        } while (choice != 5);
+        } while (choice != 6);
 
         scanner.close();
     }
@@ -84,8 +86,8 @@ public class Main {
         ticketPool = new TicketPool(config.getMaxTicketCapacity(), config.getMaxTickets());
 
         // Create vendor and customer objects with configuration values
-        vendor = new Vendor(ticketPool, config.getTicketReleaseRate());  // Only 2 arguments
-        customer = new Customer(ticketPool, config.getCustomerRetrievalRate());  // Only 2 arguments
+        vendor = new Vendor(ticketPool, config.getTicketReleaseRate());
+        customer = new Customer(ticketPool, config.getCustomerRetrievalRate());
 
         // Start the vendor thread (add tickets)
         vendorThread = new Thread(vendor);
