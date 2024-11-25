@@ -24,7 +24,7 @@ public class Customer implements Runnable {
                     }
                 }
                 // Simulate some delay between ticket retrieval cycles
-                Thread.sleep(1500);
+                Thread.sleep(1000);
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

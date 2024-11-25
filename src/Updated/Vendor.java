@@ -23,7 +23,7 @@ public class Vendor implements Runnable {
             }
             try {
                 // Simulate the delay between ticket additions (adjust the sleep as necessary)
-                Thread.sleep(1500);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

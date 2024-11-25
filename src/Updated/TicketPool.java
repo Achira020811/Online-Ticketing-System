@@ -21,21 +21,36 @@ public class TicketPool {
         // Check if the total tickets added is less than maxTickets
         if (currentTickets < maxTickets) {
             if (currentTickets < maxCapacity) {
-                Configuration o1 =new Configuration();
+                Configuration o1 = new Configuration();
                 currentTickets += o1.getTicketReleaseRate();
 
-                System.out.println(o1.getTicketReleaseRate()+" Tickets added. Current tickets in the Pool: " + currentTickets);
+                // Print and wait for a moment before continuing
+                System.out.println(o1.getTicketReleaseRate() + " Tickets added. Current tickets in the Pool: " + currentTickets);
+
+                // Add delay to avoid flooding the console with outputs
+                try {
+                    Thread.sleep(1000); // Adjust the time (in milliseconds) as needed
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }
     }
 
     public synchronized void removeTicket() {
         if (currentTickets > 0) {
-            Configuration o2 =new Configuration();
+            Configuration o2 = new Configuration();
             currentTickets -= o2.getCustomerRetrievalRate();
 
+            // Print and wait for a moment before continuing
+            System.out.println(o2.getCustomerRetrievalRate() + " Tickets bought. Current tickets in the Pool: " + currentTickets);
 
-            System.out.println(o2.getCustomerRetrievalRate() +" Tickets bought. Current tickets in the Pool: " + currentTickets);
+            // Add delay to avoid flooding the console with outputs
+            try {
+                Thread.sleep(1000); // Adjust the time (in milliseconds) as needed
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
