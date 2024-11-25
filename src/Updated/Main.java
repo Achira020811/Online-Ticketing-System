@@ -96,7 +96,7 @@ public class Main {
         try {
             // Wait for the vendor to finish adding tickets
             vendorThread.join();  // Wait for vendor to finish adding tickets
-            System.out.println("Vendor finished adding tickets.");
+//            System.out.println("Vendor finished adding tickets.");
 
             // After the vendor finishes, start the customer thread (remove tickets)
             customerThread = new Thread(customer);
@@ -104,13 +104,13 @@ public class Main {
 
             // Wait for the customer to finish removing tickets
             customerThread.join();  // Wait for customer to finish removing tickets
-            System.out.println("Customer finished removing tickets.");
+//            System.out.println("Customer finished buying tickets.");
 
         } catch (InterruptedException e) {
             logger.warning("Main thread interrupted.");
         }
 
         // After both processes (adding and removing) finish, return to the main menu
-        System.out.println("Both ticket adding and removing processes have finished. Returning to the main menu.");
+        System.out.println("Both ticket adding and buying processes have finished. Returning to the main menu.");
     }
 }

@@ -21,16 +21,21 @@ public class TicketPool {
         // Check if the total tickets added is less than maxTickets
         if (currentTickets < maxTickets) {
             if (currentTickets < maxCapacity) {
-                currentTickets++;
-                System.out.println("Ticket added. Current tickets: " + currentTickets);
+                Configuration o1 =new Configuration();
+                currentTickets += o1.getTicketReleaseRate();
+
+                System.out.println(o1.getTicketReleaseRate()+" Tickets added. Current tickets in the Pool: " + currentTickets);
             }
         }
     }
 
     public synchronized void removeTicket() {
         if (currentTickets > 0) {
-            currentTickets--;
-            System.out.println("Ticket removed. Current tickets: " + currentTickets);
+            Configuration o2 =new Configuration();
+            currentTickets -= o2.getCustomerRetrievalRate();
+
+
+            System.out.println(o2.getCustomerRetrievalRate() +" Tickets bought. Current tickets in the Pool: " + currentTickets);
         }
     }
 

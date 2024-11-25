@@ -23,13 +23,13 @@ public class Vendor implements Runnable {
             }
             try {
                 // Simulate the delay between ticket additions (adjust the sleep as necessary)
-                Thread.sleep(1000); // You can change this to adjust the rate of adding tickets
+                Thread.sleep(1500);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
         // Stop adding tickets once maxTickets is reached
         ticketPool.stopAddingTickets();
-        System.out.println("Vendor finished adding tickets.");
+        System.out.println("Vendor has finished adding tickets.");
     }
 }

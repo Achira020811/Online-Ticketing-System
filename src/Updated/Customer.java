@@ -24,12 +24,12 @@ public class Customer implements Runnable {
                     }
                 }
                 // Simulate some delay between ticket retrieval cycles
-                Thread.sleep(1000); // Adjust sleep time as necessary
+                Thread.sleep(1500);
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
-        System.out.println("Customer has finished removing tickets.");
+        System.out.println("Customer has finished buying tickets.");
     }
 }
